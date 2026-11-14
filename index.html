@@ -724,20 +724,36 @@
     apply(); saveState();
   });
 
-  /* ---------- waitlist form (placeholder — wire to a form backend before launch) ---------- */
+  /* ---------- waitlist form — entries land in the "CureoYard Waitlist" Google Sheet ---------- */
+  var FORM_ENDPOINT = 'https://docs.google.com/forms/d/e/1FAIpQLSd_6ngSWeDQeXlTnq-JhZRQgtHbo_p4DdD-oq3kVGK6XYGU5g/formResponse';
+  var FORM_FIELDS = { name:'entry.98172327', email:'entry.793082583', idea:'entry.1572539829' };
+
   var form = document.getElementById('waitlist-form');
   form.addEventListener('submit', function(e){
     e.preventDefault();
     var name = document.getElementById('f-name');
     var email = document.getElementById('f-email');
+    var idea = document.getElementById('f-idea');
     if(!name.value.trim()){ name.focus(); return; }
     if(!email.value.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value)){ email.focus(); return; }
 
-    /* TODO: send { name, email, idea } to your form backend here
-       (e.g. Formspree, Tally, or your own endpoint), then show success. */
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
 
-    form.style.display = 'none';
-    document.getElementById('form-success').style.display = 'block';
+    var data = new URLSearchParams();
+    data.append(FORM_FIELDS.name, name.value.trim());
+    data.append(FORM_FIELDS.email, email.value.trim());
+    data.append(FORM_FIELDS.idea, idea.value.trim());
+
+    fetch(FORM_ENDPOINT, {
+      method:'POST',
+      mode:'no-cors',
+      headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+      body:data.toString()
+    }).catch(function(){}).finally(function(){
+      form.style.display = 'none';
+      document.getElementById('form-success').style.display = 'block';
+    });
   });
 
   /* ---------- legal overlays, routed on the hash ---------- */
